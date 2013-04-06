@@ -41,18 +41,24 @@ void main()
    	vec3 bitangent = cross(normal, tangent);
    	mat3 tbn = mat3(tangent, bitangent, normal);
 	float ssao = 0.0;
+	float sumofdots = 0.0;
+	bool isBackground = false;
 	int i;
 	for (i = 0; i < NumRays;i++) {
 		vec3 sample = tbn * SampleRays[i];
-		sample = sample * SampleRadius;
+		sample = sample * SampleRadius + origin.xyz;
 		vec4 offset = vec4(sample, 1.0);
-		offset = ProjectionMatrix * offset + origin;
-		offset.xy /= offset.w;
-		offset.xy = offset.xy * 0.5 + 0.5;
-		float sampleDepth = texture2DRect(PositionBuffer, offset.xy).r;
-		float rangeCheck= abs(origin.z - sampleDepth) < SampleRadius ? 1.0 : 0.0;
-		ssao += (sampleDepth <= sample.z ? 1.0 : 0.0) * rangeCheck;
+		offset = ProjectionMatrix * offset;
+		offset.xyz /= offset.w;
+		offset.xyz = offset.xyz * 0.5 + 0.5;
+		float sampleDepth = texture2DRect(PositionBuffer, offset.xy).z;
+		if (sampleDepth == 0.0) {
+			isBackground = true;
+			break;
+		}
+		ssao += sampleDepth <= sample.z ? dot(normal,sample) : 0.0;
+		sumofdots += dot(normal,sample);
 	}
-	ssao = 1.0 - (ssao / float(NumRays));
-	gl_FragColor = vec4(ssao,ssao,ssao,1.0);
+	ssao = 1.0 - (ssao / sumofdots);
+	gl_FragColor = isBackground ? vec4(1.0) : vec4(ssao,ssao,ssao,1.0);
 }
