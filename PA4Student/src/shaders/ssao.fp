@@ -53,6 +53,6 @@ void main()
 		float rangeCheck= abs(origin.z - sampleDepth) < SampleRadius ? 1.0 : 0.0;
 		ssao += (sampleDepth <= sample.z ? 1.0 : 0.0) * rangeCheck;
 	}
-	
+	ssao = 1.0 - (ssao / float(NumRays));
 	gl_FragColor = vec4(ssao,ssao,ssao,1.0);
 }
