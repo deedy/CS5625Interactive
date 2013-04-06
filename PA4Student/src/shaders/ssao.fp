@@ -31,5 +31,27 @@ vec3 decode(vec2 v)
 void main()
 {
 	// TODO PA4: Implement SSAO. Your output color should be grayscale where white is unobscured and black is fully obscured.
-	gl_FragColor = vec4(1.0);
+	vec4 origin = texture2DRect(PositionBuffer, vec2(0.0,0.0));
+
+	
+	vec3 normal = vec3(0.0,1.0,0.0);
+	vec3 rvec = vec3(0.0, 1.0, 0.0);
+	vec3 tangent = normalize(rvec - normal * dot(rvec, normal));
+   	vec3 bitangent = cross(normal, tangent);
+   	mat3 tbn = mat3(tangent, bitangent, normal);
+	float ssao = 0.0;
+	int i;
+	for (i = 0; i < NumRays;i++) {
+		vec3 sample = tbn * SampleRays[i];
+		sample = sample * SampleRadius;
+		vec4 offset = vec4(sample, 1.0);
+		offset = ProjectionMatrix * offset + origin;
+		offset.xy /= offset.w;
+		offset.xy = offset.xy * 0.5 + 0.5;
+		float sampleDepth = texture2DRect(PositionBuffer, offset.xy).r;
+		float rangeCheck= abs(origin.z - sampleDepth) < SampleRadius ? 1.0 : 0.0;
+		ssao += (sampleDepth <= sample.z ? 1.0 : 0.0) * rangeCheck;
+	}
+	
+	gl_FragColor = vec4(ssao,ssao,ssao,1.0);
 }

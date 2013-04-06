@@ -890,7 +890,6 @@ public class Renderer
 			float y = (float) (Math.sin(theta)*Math.sin(phi));
 			float z = (float) Math.abs(Math.cos(theta));
 			mSampleRays[i] = new Vector3f(x,y,z);
-			System.out.println(x+" "+y+" "+z);
 		}
 	}
 	
