@@ -35,6 +35,21 @@ vec2 encode(vec3 n)
 
 void main()
 {
-	// TODO PA4 Prereq: Store diffuse color, position, encoded normal, material ID, and all other useful data in the g-buffer.
-	gl_FragData[0] = gl_FragData[1] = gl_FragData[2] = gl_FragData[3] = vec4(1.0);
+    // Store diffuse color, position, encoded normal, material ID, and all other useful data in the g-buffer.
+    vec2 encoded = encode(normalize(EyespaceNormal));
+
+    gl_FragData[0].rgb = DiffuseColor;
+    if (HasDiffuseTexture)
+    {
+        gl_FragData[0].rgb *= texture2D(DiffuseTexture, TexCoord).stp;
+    }
+    gl_FragData[0].a = encoded.x;
+
+    gl_FragData[1].xyz = EyespacePosition;
+    gl_FragData[1].a = encoded.y;
+
+    gl_FragData[2].r = float(LAMBERTIAN_MATERIAL_ID);
+    gl_FragData[2].gba = vec3(0.0);
+
+    gl_FragData[3] = vec4(0.0);
 }

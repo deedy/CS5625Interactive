@@ -882,7 +882,15 @@ public class Renderer
 		// TODO PA4: Generate numRays random normalized vectors.
 		mSampleRays = new Vector3f[numRays];
 		for(int i = 0; i < numRays; i++) {
-			mSampleRays[i] = new Vector3f();
+			double u = Math.random();
+			double v = Math.random();
+			double theta = 2*Math.PI*u;
+			double phi = Math.acos(2*v-1);
+			float x = (float) (Math.sin(theta)*Math.cos(phi));
+			float y = (float) (Math.sin(theta)*Math.sin(phi));
+			float z = (float) Math.abs(Math.cos(theta));
+			mSampleRays[i] = new Vector3f(x,y,z);
+			System.out.println(x+" "+y+" "+z);
 		}
 	}
 	

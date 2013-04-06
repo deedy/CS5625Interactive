@@ -63,7 +63,8 @@ public class LambertianMaterial extends Material
 		/* Bind shader, and any textures, and update uniforms. */
 		getShaderProgram().bind(gl);
 
-		// TODO PA4 Prereq: Set shader uniforms and bind any textures.
+		setUniformColor(gl, mDiffuseUniformLocation, mDiffuseColor);
+		bindTexture(gl, mDiffuseTexture, mHasDiffuseTextureUniformLocation, 0);
 	}
 
 	@Override
@@ -72,8 +73,7 @@ public class LambertianMaterial extends Material
 		/* Unbind anything bound in bind(). */
 		getShaderProgram().unbind(gl);
 
-		// TODO PA4 Prereq: Unbind any used textures.
-	}
+		unbindTexture(gl, mDiffuseTexture);	}
 	
 	@Override
 	protected void initializeShader(GL2 gl, ShaderProgram shader)

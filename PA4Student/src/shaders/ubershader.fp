@@ -149,7 +149,6 @@ void main()
 		gl_FragColor.rgb = diffuse;
 	}
 	
-	// TODO PA4 Prereq: Update our Lambertian and Blinn-Phong cases to use your material encoding schemes.
 	else if (materialID == LAMBERTIAN_MATERIAL_ID)
 	{
 		/* Accumulate Lambertian shading for each light. */

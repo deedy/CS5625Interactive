@@ -21,7 +21,7 @@ void main()
 	/* Standard vertex transform. */
 	gl_Position = ftransform();
 	
-	// TODO PA4 Prereq: Transform stuff into eye space and store in varyings.
-	EyespacePosition = EyespaceNormal = vec3(1.0);
-	TexCoord = vec2(1.0);
+	EyespacePosition = vec3(gl_ModelViewMatrix * gl_Vertex);
+    EyespaceNormal = normalize(gl_NormalMatrix * gl_Normal);
+    TexCoord = gl_MultiTexCoord0.st;
 }

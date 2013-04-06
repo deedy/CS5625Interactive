@@ -118,8 +118,13 @@ public class BlinnPhongMaterial extends Material
 	{
 		/* Bind shader and any textures, and update uniforms. */
 		getShaderProgram().bind(gl);
-		
-		// TODO PA4 Prereq: Set shader uniforms and bind any textures.
+
+		setUniformColor(gl, mDiffuseUniformLocation, mDiffuseColor);
+		setUniformColor(gl, mSpecularUniformLocation, mSpecularColor);
+		gl.glUniform1f(mExponentUniformLocation, mPhongExponent);
+		bindTexture(gl, mDiffuseTexture, mHasDiffuseTextureUniformLocation, 0);
+		bindTexture(gl, mSpecularTexture, mHasSpecularTextureUniformLocation, 1);
+		bindTexture(gl, mExponentTexture, mHasExponentTextureUniformLocation, 2);
 	}
 	
 	@Override
@@ -147,7 +152,9 @@ public class BlinnPhongMaterial extends Material
 	{
 		/* Unbind everything bound in bind(). */
 		getShaderProgram().unbind(gl);
-		
-		// TODO PA4 Prereq: Unbind any used textures.
+
+		unbindTexture(gl, mDiffuseTexture);
+		unbindTexture(gl, mExponentTexture);
+		unbindTexture(gl, mSpecularTexture);
 	}
 }
