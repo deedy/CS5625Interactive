@@ -51,14 +51,15 @@ void main()
 		offset = ProjectionMatrix * offset;
 		offset.xyz /= offset.w;
 		offset.xyz = offset.xyz * 0.5 + 0.5;
+		offset.xy *= ScreenSize;
 		float sampleDepth = texture2DRect(PositionBuffer, offset.xy).z;
 		if (sampleDepth == 0.0) {
 			isBackground = true;
 			break;
 		}
-		ssao += sampleDepth <= sample.z ? dot(normal,sample) : 0.0;
+		ssao += (sampleDepth <= sample.z ? dot(normal,sample) : 0.0);
 		sumofdots += dot(normal,sample);
 	}
-	ssao = 1.0 - (ssao / sumofdots);
+	ssao = (ssao / sumofdots);
 	gl_FragColor = isBackground ? vec4(1.0) : vec4(ssao,ssao,ssao,1.0);
 }
