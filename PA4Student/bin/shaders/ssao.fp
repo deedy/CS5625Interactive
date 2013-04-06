@@ -53,7 +53,7 @@ void main()
 		offset.xyz = offset.xyz * 0.5 + 0.5;
 		offset.xy *= ScreenSize;
 		float sampleDepth = texture2DRect(PositionBuffer, offset.xy).z;
-		if (sampleDepth == 0.0) {
+		if (abs(sampleDepth)< 0.001) {
 			isBackground = true;
 			break;
 		}

@@ -890,6 +890,7 @@ public class Renderer
 			float y = (float) (Math.sin(theta)*Math.sin(phi));
 			float z = (float) Math.abs(Math.cos(theta));
 			mSampleRays[i] = new Vector3f(x,y,z);
+			mSampleRays[i].normalize();
 		}
 	}
 	
@@ -997,7 +998,6 @@ public class Renderer
 		    createNewSSAORays(mMaxSSAORays / 2);
 			
 		    
-			/* Load the material used to render mesh edges (e.g. creases for subdivs). */
 			mWireframeMaterial = new UnshadedMaterial(new Color3f(0.8f, 0.8f, 0.8f));
 			mWireframeMarkedEdgeMaterial = new UnshadedMaterial(new Color3f(1.0f, 0.0f, 1.0f));
 			
