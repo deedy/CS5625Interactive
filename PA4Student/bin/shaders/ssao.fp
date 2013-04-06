@@ -31,10 +31,11 @@ vec3 decode(vec2 v)
 void main()
 {
 	// TODO PA4: Implement SSAO. Your output color should be grayscale where white is unobscured and black is fully obscured.
-	vec4 origin = texture2DRect(PositionBuffer, vec2(0.0,0.0));
+	vec4 origin = texture2DRect(PositionBuffer, gl_FragCoord.xy);
 
 	
-	vec3 normal = vec3(0.0,1.0,0.0);
+	vec3 normal = decode(vec2(texture2DRect(DiffuseBuffer, gl_FragCoord.xy).a,
+	                                   texture2DRect(PositionBuffer, gl_FragCoord.xy).a));
 	vec3 rvec = vec3(0.0, 1.0, 0.0);
 	vec3 tangent = normalize(rvec - normal * dot(rvec, normal));
    	vec3 bitangent = cross(normal, tangent);
