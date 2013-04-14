@@ -73,6 +73,43 @@ public abstract class Material implements OpenGLResourceObject
 	}
 	
 	/**
+	 * Caleb's helper method to bind textures.
+	 * @param gl
+	 * @param texture
+	 * @param hasTextureLocation
+	 * @throws OpenGLException
+	 */
+	protected static void bindTexture(GL2 gl, Texture2D texture, int hasTextureLocation, int texIndex) throws OpenGLException {
+		if (texture == null) {
+			gl.glUniform1i(hasTextureLocation, 0);
+		} else {
+			gl.glUniform1i(hasTextureLocation, 1);
+			texture.bind(gl, texIndex);
+		}
+	}
+
+	/**
+	 * Caleb's helper to set color
+	 * @param gl
+	 * @param location
+	 * @param color
+	 */
+	protected static void setUniformColor(GL2 gl, int location, Color3f color) {
+		gl.glUniform3f(location, color.x, color.y, color.z);
+	}
+
+	/**
+	 * Caleb's helper to unbind a texture
+	 * @param gl
+	 * @param tex
+	 */
+	protected static void unbindTexture(GL2 gl, Texture2D tex) {
+		if (tex != null) {
+			tex.unbind(gl);
+		}
+	}
+	
+	/**
 	 * Retrieves the shader for this material from the cache, loading and initializing it if necessary, 
 	 * and stores it in the 'mShaderProgram' instance variable.
 	 * 

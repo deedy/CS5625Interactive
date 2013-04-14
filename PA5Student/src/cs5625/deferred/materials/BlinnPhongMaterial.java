@@ -8,12 +8,12 @@ import cs5625.deferred.rendering.ShaderProgram;
 
 /**
  * BlinnPhongMaterial.java
- * 
+ *
  * Implements the Blinn-Phong shading model.
- * 
+ *
  * Written for Cornell CS 5625 (Interactive Computer Graphics).
  * Copyright (c) 2012, Computer Science Department, Cornell University.
- * 
+ *
  * @author Asher Dunn (ad488)
  * @date 2012-03-24
  */
@@ -23,12 +23,12 @@ public class BlinnPhongMaterial extends Material
 	private Color3f mDiffuseColor = new Color3f(1.0f, 1.0f, 1.0f);
 	private Color3f mSpecularColor = new Color3f(1.0f, 1.0f, 1.0f);
 	private float mPhongExponent = 50.0f;
-	
+
 	/* Optional textures for texture parameterized rendering. */
 	private Texture2D mDiffuseTexture = null;
 	private Texture2D mSpecularTexture = null;
 	private Texture2D mExponentTexture = null;
-	
+
 	/* Uniform locations for the shader. */
 	private int mDiffuseUniformLocation = -1;
 	private int mSpecularUniformLocation = -1;
@@ -36,7 +36,7 @@ public class BlinnPhongMaterial extends Material
 	private int mHasDiffuseTextureUniformLocation = -1;
 	private int mHasSpecularTextureUniformLocation = -1;
 	private int mHasExponentTextureUniformLocation = -1;
-	
+
 	public BlinnPhongMaterial()
 	{
 		/* Default constructor. */
@@ -46,12 +46,12 @@ public class BlinnPhongMaterial extends Material
 	{
 		mDiffuseColor.set(diffuse);
 	}
-	
+
 	public Color3f getDiffuseColor()
 	{
 		return mDiffuseColor;
 	}
-	
+
 	public void setDiffuseColor(Color3f diffuse)
 	{
 		mDiffuseColor = diffuse;
@@ -61,17 +61,17 @@ public class BlinnPhongMaterial extends Material
 	{
 		return mSpecularColor;
 	}
-	
+
 	public void setSpecularColor(Color3f specular)
 	{
 		mSpecularColor = specular;
 	}
-	
+
 	public float getPhongExponent()
 	{
 		return mPhongExponent;
 	}
-	
+
 	public void setPhongExponent(float exponent)
 	{
 		mPhongExponent = exponent;
@@ -81,7 +81,7 @@ public class BlinnPhongMaterial extends Material
 	{
 		return mDiffuseTexture;
 	}
-	
+
 	public void setDiffuseTexture(Texture2D texture)
 	{
 		mDiffuseTexture = texture;
@@ -91,17 +91,17 @@ public class BlinnPhongMaterial extends Material
 	{
 		return mSpecularTexture;
 	}
-	
+
 	public void setSpecularTexture(Texture2D texture)
 	{
 		mSpecularTexture = texture;
 	}
-	
+
 	public Texture2D getExponentTexture()
 	{
 		return mExponentTexture;
 	}
-	
+
 	public void setExponentTexture(Texture2D texture)
 	{
 		mExponentTexture = texture;
@@ -112,16 +112,21 @@ public class BlinnPhongMaterial extends Material
 	{
 		return "shaders/material_blinnphong";
 	}
-		
+
 	@Override
 	public void bind(GL2 gl) throws OpenGLException
 	{
 		/* Bind shader and any textures, and update uniforms. */
 		getShaderProgram().bind(gl);
-		
-		// TODO PA5 Prereq: Set shader uniforms and bind any textures.
+
+		setUniformColor(gl, mDiffuseUniformLocation, mDiffuseColor);
+		setUniformColor(gl, mSpecularUniformLocation, mSpecularColor);
+		gl.glUniform1f(mExponentUniformLocation, mPhongExponent);
+		bindTexture(gl, mDiffuseTexture, mHasDiffuseTextureUniformLocation, 0);
+		bindTexture(gl, mSpecularTexture, mHasSpecularTextureUniformLocation, 1);
+		bindTexture(gl, mExponentTexture, mHasExponentTextureUniformLocation, 2);
 	}
-	
+
 	@Override
 	protected void initializeShader(GL2 gl, ShaderProgram shader)
 	{
@@ -129,11 +134,11 @@ public class BlinnPhongMaterial extends Material
 		mDiffuseUniformLocation = shader.getUniformLocation(gl, "DiffuseColor");
 		mSpecularUniformLocation = shader.getUniformLocation(gl, "SpecularColor");
 		mExponentUniformLocation = shader.getUniformLocation(gl, "PhongExponent");
-		
+
 		mHasDiffuseTextureUniformLocation = shader.getUniformLocation(gl, "HasDiffuseTexture");
 		mHasSpecularTextureUniformLocation = shader.getUniformLocation(gl, "HasSpecularTexture");
 		mHasExponentTextureUniformLocation = shader.getUniformLocation(gl, "HasExponentTexture");
-		
+
 		/* These are only set once, so set them here. */
 		shader.bind(gl);
 		gl.glUniform1i(shader.getUniformLocation(gl, "DiffuseTexture"), 0);
@@ -147,7 +152,9 @@ public class BlinnPhongMaterial extends Material
 	{
 		/* Unbind everything bound in bind(). */
 		getShaderProgram().unbind(gl);
-		
-		// TODO PA5 Prereq: Unbind any used textures.
+
+		unbindTexture(gl, mDiffuseTexture);
+		unbindTexture(gl, mExponentTexture);
+		unbindTexture(gl, mSpecularTexture);
 	}
 }

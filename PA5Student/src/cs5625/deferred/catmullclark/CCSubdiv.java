@@ -35,23 +35,23 @@ public class CCSubdiv {
 		for(Integer face : faceIds){
 				
 		}
-		
-		verts.
-		mMesh.
-		
-		// returns all keys
-		getEdgeIDs()
-		getVertexIDs()
-		getPolygonIDs()
-		
-		//returns value for key
-		getEdgeData()
-		getVertexData()
-		getPolygonData()
-		
-		getOtherEdgesOfLeftFace()
-		getOtherEdgesOfRightFace()
-		
+//		
+//		verts.
+//		mMesh.
+//		
+//		// returns all keys
+//		getEdgeIDs()
+//		getVertexIDs()
+//		getPolygonIDs()
+//		
+//		//returns value for key
+//		getEdgeData()
+//		getVertexData()
+//		getPolygonData()
+//		
+//		getOtherEdgesOfLeftFace()
+//		getOtherEdgesOfRightFace()
+//		
 //		//subdivide it
 //		CCSubdiv loopSubdiv = new CCSubdiv(edgeDS);
 //		

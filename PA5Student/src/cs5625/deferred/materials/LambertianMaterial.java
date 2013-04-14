@@ -8,12 +8,12 @@ import cs5625.deferred.rendering.ShaderProgram;
 
 /**
  * LambertianMaterial.java
- * 
+ *
  * Implements a Lambertian (perfectly diffuse) material.
- * 
+ *
  * Written for Cornell CS 5625 (Interactive Computer Graphics).
  * Copyright (c) 2012, Computer Science Department, Cornell University.
- * 
+ *
  * @author Asher Dunn (ad488)
  * @date 2012-03-27
  */
@@ -26,7 +26,7 @@ public class LambertianMaterial extends Material
 	/* Uniform locations. */
 	private int mDiffuseUniformLocation = -1;
 	private int mHasDiffuseTextureUniformLocation = -1;
-	
+
 	public LambertianMaterial()
 	{
 		/* Default constructor. */
@@ -41,17 +41,17 @@ public class LambertianMaterial extends Material
 	{
 		return mDiffuseColor;
 	}
-	
+
 	public void setDiffuseColor(Color3f diffuse)
 	{
 		mDiffuseColor = diffuse;
 	}
-	
+
 	public Texture2D getDiffuseTexture()
 	{
 		return mDiffuseTexture;
 	}
-	
+
 	public void setDiffuseTexture(Texture2D texture)
 	{
 		mDiffuseTexture = texture;
@@ -63,7 +63,8 @@ public class LambertianMaterial extends Material
 		/* Bind shader, and any textures, and update uniforms. */
 		getShaderProgram().bind(gl);
 
-		// TODO PA5 Prereq: Set shader uniforms and bind any textures.
+		setUniformColor(gl, mDiffuseUniformLocation, mDiffuseColor);
+		bindTexture(gl, mDiffuseTexture, mHasDiffuseTextureUniformLocation, 0);
 	}
 
 	@Override
@@ -72,9 +73,9 @@ public class LambertianMaterial extends Material
 		/* Unbind anything bound in bind(). */
 		getShaderProgram().unbind(gl);
 
-		// TODO PA5 Prereq: Unbind any used textures.
+		unbindTexture(gl, mDiffuseTexture);
 	}
-	
+
 	@Override
 	protected void initializeShader(GL2 gl, ShaderProgram shader)
 	{
