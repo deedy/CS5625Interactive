@@ -36,9 +36,23 @@ public class LoopSubdiv {
 	
 	public LoopSubdiv(EdgeDS edgeDS)
 	{
-		//TreeMap of new vertices
+		// REMOVE
+		Set<Integer> vids = edgeDS.getVertexIDs();
+		for(int id : vids){
+			System.out.println(id+", " + edgeDS.getVertexData(id).mData.getPosition());
+		}
+		System.out.println("=====================");
+		
+		// Maps for new verts, edges, polys
 		TreeMap<Integer, VertexAttributeData> newVerts = new TreeMap<Integer, VertexAttributeData>();
 		int newVertID = 0;
+		
+		TreeMap<Integer, EdgeData> newEdges = new TreeMap<Integer, EdgeData>();
+		int newEdgeID = 0;
+		
+		TreeMap<Integer, PolygonData> newPolys = new TreeMap<Integer, PolygonData>();
+		int newPolyID = 0;
+		
 		//Scan through all edges and create new vertices with correct positions
 		for(Integer edgeID : edgeDS.getEdgeIDs()) {
 			EdgeData edge = edgeDS.getEdgeData(edgeID);
@@ -67,7 +81,7 @@ public class LoopSubdiv {
 			Point3f pos;
 			Point2f tex;
 			if (leftVert != null && rightVert != null) {
-				//Normal Case
+				// Normal Case
 				pos = new Point3f(vert0.getPosition());
 				tex = new Point2f(vert0.getTexCoord());
 				pos.scale(3f/8f);
@@ -104,10 +118,17 @@ public class LoopSubdiv {
 				pos.add(temp);
 				tex.add(temp1);
 			}
-			newVerts.put(newVertID, new VertexAttributeData(pos, tex)); //Inserting vertex into our TreeMap
-			edge.setVertexIDNew(newVertID++); //Storing the new vertex in the edge it was created in
+			
+			// REMOVE
+			System.out.println(newVertID+", "+ pos);
+			
+			 //Inserting vertex into our TreeMap
+			newVerts.put(newVertID, new VertexAttributeData(pos, tex));
+			
+			//Storing the new vertex in the edge it was created in
+			edge.setVertexIDNew(newVertID++); 
+			
 		}
-		
 		
 		//Scan through all vertices to find new positions of the existing ones
 		for (Integer vertID : edgeDS.getVertexIDs()) {
@@ -130,6 +151,7 @@ public class LoopSubdiv {
 			}
 			pos.scale(1f-(scalar*(float)adjacency));
 			tex.scale(1f-(scalar*(float)adjacency));		
+			
 			//Scale adjacent vertices appropriately
 			for(Integer vertIDnew : vert.getConnectedVertices()) {
 				VertexAttributeData vData = edgeDS.getVertexData(vertIDnew).mData;
@@ -144,13 +166,8 @@ public class LoopSubdiv {
 			vert.setNewVertexID(newVertID++); //Setting the old vertex IDs to the new ones we created
 		}
 		
-		//Creating a TreeMap for our new edges
-		TreeMap<Integer, EdgeData> newEdges = new TreeMap<Integer, EdgeData>();
-		int newEdgeID = 0;
-		//Creating a TreeMap for our new polygons
-		TreeMap<Integer, PolygonData> newPolys = new TreeMap<Integer, PolygonData>();
-		int newPolyID = 0;
-		//Scan through all the preexisting edges to create new ones
+
+		//Scan through all the pre-existing edges to create new ones
 		for(Integer edgeID : edgeDS.getEdgeIDs()) {
 			EdgeData edge = edgeDS.getEdgeData(edgeID);
 			int newVertex = edge.getNewVertexID();
@@ -160,21 +177,26 @@ public class LoopSubdiv {
 			newEdges.put(edge0n, new EdgeData(vert0,newVertex)); //For each edge put an edge between the one old vertex and the new one
 			int edgen1 = newEdgeID++;
 			newEdges.put(edgen1, new EdgeData(newVertex,vert1)); // and  an edge between the new one and the other old vertex
-			//Store connectivity
+			
+			//Store connectivity (in pairs)
 			edgeDS.getVertexData(vert0).addVertexConnectivity(new EdgeVertexPair(edge0n, newVertex));
 			edgeDS.getVertexData(newVertex).addVertexConnectivity(new EdgeVertexPair(edge0n, vert0));
+			
 			edgeDS.getVertexData(newVertex).addVertexConnectivity(new EdgeVertexPair(edgen1, vert1));
-			edgeDS.getVertexData(vert1).addVertexConnectivity(new EdgeVertexPair(edgen1, newVertex));
+			edgeDS.getVertexData(vert1).addVertexConnectivity(new EdgeVertexPair(edgen1, newVertex));	
 		}
 		
-		//Scan through all the preexisting polygonal faces to create new ones and the remaining edges
+		//Scan through all the pre-existing polygons to create new ones and the remaining edges
 		for(Integer polyID : edgeDS.getPolygonIDs()) {
 			PolygonData poly = edgeDS.getPolygonData(polyID);
 			ArrayList<Integer> allEdges = poly.getAllEdges();
+			
 			//Find the new vertices of the face
 			int newvert0 = edgeDS.getEdgeData(allEdges.get(0)).getNewVertexID();
 			int newvert1 = edgeDS.getEdgeData(allEdges.get(1)).getNewVertexID();
 			int newvert2 = edgeDS.getEdgeData(allEdges.get(2)).getNewVertexID();
+			System.out.println(newvert0 +", "+newvert1 +", "+newvert2);
+			
 			//Insert the 3 new edges between the new vertices
 			int edgenv0nv1 = newEdgeID++;
 			newEdges.put(edgenv0nv1, new EdgeData(newvert0,newvert1));
@@ -182,17 +204,20 @@ public class LoopSubdiv {
 			newEdges.put(edgenv1nv2, new EdgeData(newvert1,newvert2));
 			int edgenv2nv0 = newEdgeID++;
 			newEdges.put(edgenv2nv0, new EdgeData(newvert2,newvert0));
-			//Get the 3 preexisting vertices in the triangle
+			
+			//Get the 3 pre-existing vertices in the triangle
 			int vert0 = edgeDS.getEdgeData(allEdges.get(0)).getVertex0();
 			int vert1 = edgeDS.getEdgeData(allEdges.get(1)).getVertex0();
 			int vert2 = edgeDS.getEdgeData(allEdges.get(2)).getVertex0();
-			//Get the 6 edges connecting the 3 preexisting vertices to the new ones
+			
+			//Get the 6 edges connecting the 3 pre-existing vertices to the new ones
 			int edge0nv0 = edgeDS.getVertexData(vert0).getEdgeIDforEdgeWithThisVertex(newvert0).getData();
 			int edgenv01 = edgeDS.getVertexData(vert1).getEdgeIDforEdgeWithThisVertex(newvert0).getData();
 			int edge1nv1 = edgeDS.getVertexData(vert1).getEdgeIDforEdgeWithThisVertex(newvert1).getData();
 			int edgenv12 = edgeDS.getVertexData(vert2).getEdgeIDforEdgeWithThisVertex(newvert1).getData();
 			int edge2nv2 = edgeDS.getVertexData(vert2).getEdgeIDforEdgeWithThisVertex(newvert2).getData();
 			int edgenv20 = edgeDS.getVertexData(vert0).getEdgeIDforEdgeWithThisVertex(newvert2).getData();
+			
 			//Create the 4 polygons of a triangular face accordingly
 			newPolys.put(newPolyID++, new PolygonData(edgenv0nv1,edgenv1nv2,edgenv2nv0,newvert0,newvert1,newvert2));
 			newPolys.put(newPolyID++, new PolygonData(edge0nv0,edgenv2nv0,edgenv20,vert0,newvert0,newvert2));
