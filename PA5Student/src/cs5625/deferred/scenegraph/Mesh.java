@@ -53,8 +53,8 @@ public abstract class Mesh implements OpenGLResourceObject
 	public abstract int getVerticesPerPolygon();
 	
 	/**
-	 * Implemented by subclasses to calculate surface tangent vectors based on the vertices, 
-	 * normals, and texture coordinates of this mesh.
+		 * Implemented by subclasses to calculate surface tangent vectors based on the vertices, 
+		 * normals, and texture coordinates of this mesh.
 	 * 
 	 * The output is a 4-vector for each vertex, storing the handedness in the w component. Bitangents 
 	 * can be computed from normals and tangents as `cross(normal, tangent.xyz) * tangent.w`. 

@@ -3,6 +3,7 @@ package cs5625.deferred.misc;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
+import javax.vecmath.Point2f;
 import javax.vecmath.Point3f;
 
 import com.jogamp.common.nio.Buffers;
@@ -137,4 +138,5 @@ public class TrimeshMaker {
 		
 		return this.mMesh;
 	}
+
 }
