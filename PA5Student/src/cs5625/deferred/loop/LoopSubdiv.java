@@ -88,7 +88,7 @@ public class LoopSubdiv {
 			}
 			Point3f pos;
 			Point2f tex;
-			if (leftVert != null && rightVert != null) {
+			if (!(edgeDS.isCreaseEdge(edgeID) || edgeDS.getOtherEdgesOfRightFace(edgeID).isEmpty())) {
 				// Normal Case
 				pos = new Point3f(vert0.getPosition());
 				tex = new Point2f(vert0.getTexCoord());
@@ -318,21 +318,23 @@ public class LoopSubdiv {
 			ps.put(verts.get(2));
 		}
 		ps.rewind();
-		IntBuffer es = Buffers.newDirectIntBuffer(2*newEdges.keySet().size());
-		for(Integer e : newEdges.keySet()){
-			es.put(newEdges.get(e).getVertex0());
-			es.put(newEdges.get(e).getVertex1());
-		}
-//		for (Integer i : edgeDS.getCreaseSet()) {
-//			EdgeData edgeData = edgeDS.getEdgeData(i);
-//			int p0 = edgeDS.getVertexData(edgeData.getVertex0()).getNewVertexID();
-//			int p1 = edgeData.getNewVertexID();
-//			int p2 = edgeDS.getVertexData(edgeData.getVertex1()).getNewVertexID();
-//			es.put(p1);
-//			es.put(p0);
-//			es.put(p2);
-//			es.put(p1);
+		IntBuffer es = Buffers.newDirectIntBuffer(4*edgeDS.getCreaseSet().toArray().length);
+//		for(Integer e : newEdges.keySet()){
+//			es.put(newEdges.get(e).getVertex0());
+//			es.put(newEdges.get(e).getVertex1());
 //		}
+		System.out.println(edgeDS.getCreaseSet().toArray().length);
+		for (Integer i : edgeDS.getCreaseSet()) {
+			EdgeData edgeData = edgeDS.getEdgeData(i);
+			int p0 = edgeDS.getVertexData(edgeData.getVertex0()).getNewVertexID();
+			int p1 = edgeData.getNewVertexID();
+			int p2 = edgeDS.getVertexData(edgeData.getVertex1()).getNewVertexID();
+			System.out.println(p0+" "+p1+" "+p2);
+			es.put(p1);
+			es.put(p0);
+			es.put(p2);
+			es.put(p1);
+		}
 		es.rewind();
 		//Trimesh m = new Trimesh();
 		this.mMesh = edgeDS.getMesh();
