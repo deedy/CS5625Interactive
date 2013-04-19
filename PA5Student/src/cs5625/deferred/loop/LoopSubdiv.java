@@ -40,21 +40,11 @@ public class LoopSubdiv {
 	private Mesh mMesh;
 	
 	public LoopSubdiv(EdgeDS edgeDS)
-	{
-		// REMOVE
-//		Set<Integer> vids = edgeDS.getVertexIDs();
-//		for(int id : vids){
-//			System.out.println(id+", " + edgeDS.getVertexData(id).mData.getPosition());
-//		}
-//		System.out.println("=====================");
-		
-		
+	{	
 		
 		// Maps for new verts, edges, polys
 		TreeMap<Integer, VertexData> newVerts = new TreeMap<Integer, VertexData>();
 		int newVertID = 0;
-	
-		
 		TreeMap<Integer, EdgeData> newEdges = new TreeMap<Integer, EdgeData>();
 		int newEdgeID = 0;
 		TreeMap<Integer, PolygonData> newPolys = new TreeMap<Integer, PolygonData>();
@@ -126,10 +116,6 @@ public class LoopSubdiv {
 				pos.add(temp);
 				tex.add(temp1);
 			}
-			
-			// REMOVE
-			//System.out.println(newVertID+", "+ pos);
-			
 			 //Inserting vertex into our TreeMap
 			VertexData vertdata = new VertexData(new VertexAttributeData(pos,tex));
 			newVerts.put(newVertID, vertdata); //Put new positions of even vertices in our TreeMap
@@ -176,13 +162,8 @@ public class LoopSubdiv {
 			vert.setNewVertexID(newVertID++); //Setting the old vertex IDs to the new ones we created
 		}
 		
-//		for (Integer a : newVerts.keySet()) {
-//			VertexAttributeData x = newVerts.get(a).mData;
-//			System.out.println(a+" - "+x.getPosition());
-//		}
 		for (Integer a : edgeDS.getVertexIDs()) {
 			VertexData vert = edgeDS.getVertexData(a);
-			System.out.println(vert.getNewVertexID()+" - "+a+" - "+vert.mData.getPosition());
 		}
 			
 
@@ -208,15 +189,12 @@ public class LoopSubdiv {
 			newVerts.get(vert1).addVertexConnectivity(new EdgeVertexPair(edgen1, newVertex));	
 		}
 		
-
-		
 		//Scan through all the pre-existing polygons to create new ones and the remaining edges
 		for(Integer polyID : edgeDS.getPolygonIDs()) {
 			PolygonData poly = edgeDS.getPolygonData(polyID);
 			ArrayList<Integer> allEdges = poly.getAllEdges();
 			
 			//Find the new vertices of the face
-			// XXX RESUME - remove need for edgeDS - causing errors because it contains invalid data.
 			int newvert0 = edgeDS.getEdgeData(allEdges.get(0)).getNewVertexID();
 			int newvert1 = edgeDS.getEdgeData(allEdges.get(1)).getNewVertexID();
 			int newvert2 = edgeDS.getEdgeData(allEdges.get(2)).getNewVertexID();
@@ -234,16 +212,6 @@ public class LoopSubdiv {
 			int vert0 = edgeDS.getVertexData(poly.getAllVertices().get(0)).getNewVertexID();
 			int vert1 = edgeDS.getVertexData(poly.getAllVertices().get(1)).getNewVertexID();
 			int vert2 = edgeDS.getVertexData(poly.getAllVertices().get(2)).getNewVertexID();
-//			System.out.println(vert0+" "+vert1+" "+vert2);
-//			
-//			System.out.println("Face"+polyID+" edges: " + allEdges);
-//			
-//			System.out.println("Face" +polyID+" verts: " + poly.getAllVertices());
-//			System.out.println("verts: " + vert0 +","+vert1+","+vert2);
-//			System.out.println("intermediate verts: " + newvert0 +","+newvert1+","+newvert2);
-//			
-			//Get the 6 edges connecting the 3 pre-existing vertices to the new ones
-			//System.out.println("CANT FIND EDGE WITH: " + vert1 + " , " + newvert0);
 			
 			int e1 = newVerts.get(vert0).getEdgeIDforEdgeWithThisVertex(newvert0).getData();
 			int e2 = newVerts.get(newvert0).getEdgeIDforEdgeWithThisVertex(vert1).getData();
@@ -251,27 +219,6 @@ public class LoopSubdiv {
 			int e4 = newVerts.get(newvert1).getEdgeIDforEdgeWithThisVertex(vert2).getData();
 			int e5 = newVerts.get(vert2).getEdgeIDforEdgeWithThisVertex(newvert2).getData();
 			int e6 = newVerts.get(newvert2).getEdgeIDforEdgeWithThisVertex(vert0).getData();
-//			
-//			////////////////////////////////////////////////////
-//			// Create new edges forming center face of subdivision
-//			
-//			int e7 = newEdgeID++;
-//			newEdges.put(e7, new EdgeData(newvert0,newvert1));
-//			newVerts.get(newvert0).addVertexConnectivity(new EdgeVertexPair(e7, newvert1));			
-//			newVerts.get(newvert1).addVertexConnectivity(new EdgeVertexPair(e7, newvert0));
-//
-//			int e8 = newEdgeID++;
-//			newEdges.put(e8, new EdgeData(newvert0,newvert1));
-//			newVerts.get(newvert0).addVertexConnectivity(new EdgeVertexPair(e8, newvert1));			
-//			newVerts.get(newvert1).addVertexConnectivity(new EdgeVertexPair(e8, newvert0));
-//			
-//			int e9 = newEdgeID++;
-//			newEdges.put(e9, new EdgeData(newvert0,newvert1));
-//			newVerts.get(newvert0).addVertexConnectivity(new EdgeVertexPair(e9, newvert1));			
-//			newVerts.get(newvert1).addVertexConnectivity(new EdgeVertexPair(e9, newvert0));
-//			
-//			////////////////////////////////////////////////////
-
 			
 			//Create the 4 polygons of a triangular face accordingly
 			newPolys.put(newPolyID++, new PolygonData(e1,edgenv2nv0,e6,vert0,newvert0,newvert2));
@@ -282,20 +229,6 @@ public class LoopSubdiv {
 		}
 		
 		// Create the Trimesh
-
-		//this.mMesh.setVertexData();
-		System.out.println("CURRENT STATE DATA: \n ===============");
-		for(Integer vertID : newVerts.keySet()) {
-			System.out.println("v"+vertID +": " + newVerts.get(vertID).mData.getPosition());
-		}
-		for(Integer edgeID : newEdges.keySet()) {
-			System.out.println("e"+edgeID +": (" + newEdges.get(edgeID).getVertex0()+", " +newEdges.get(edgeID).getVertex1()+")");
-		}
-		for(Integer faceID : newPolys.keySet()) {
-			System.out.println("f"+faceID +": " + newPolys.get(faceID).getAllEdges());
-		}
-		
-		/// TODO ADD VERTS TO MESH
 		FloatBuffer vs = Buffers.newDirectFloatBuffer(3*newVerts.keySet().size());
 		FloatBuffer ts = Buffers.newDirectFloatBuffer(3*newVerts.keySet().size());
 		for(Integer v : newVerts.keySet()){
@@ -306,7 +239,6 @@ public class LoopSubdiv {
 			vs.put(p.z);
 			ts.put(t.x);
 			ts.put(t.y);
-			//vs.put(newVerts.get(v).mData.getPosition().get(arg0))
 		}
 		vs.rewind();
 		ts.rewind();
@@ -319,38 +251,24 @@ public class LoopSubdiv {
 		}
 		ps.rewind();
 		IntBuffer es = Buffers.newDirectIntBuffer(4*edgeDS.getCreaseSet().toArray().length);
-//		for(Integer e : newEdges.keySet()){
-//			es.put(newEdges.get(e).getVertex0());
-//			es.put(newEdges.get(e).getVertex1());
-//		}
-		System.out.println(edgeDS.getCreaseSet().toArray().length);
 		for (Integer i : edgeDS.getCreaseSet()) {
 			EdgeData edgeData = edgeDS.getEdgeData(i);
 			int p0 = edgeDS.getVertexData(edgeData.getVertex0()).getNewVertexID();
 			int p1 = edgeData.getNewVertexID();
 			int p2 = edgeDS.getVertexData(edgeData.getVertex1()).getNewVertexID();
-			System.out.println(p0+" "+p1+" "+p2);
 			es.put(p1);
 			es.put(p0);
 			es.put(p2);
 			es.put(p1);
 		}
 		es.rewind();
-		//Trimesh m = new Trimesh();
 		this.mMesh = edgeDS.getMesh();
 		Trimesh m = (Trimesh) this.mMesh.clone();
 		m.setVertexData(vs);
 		m.setTexCoordData(ts);
 		m.setEdgeData(es);
 		m.setPolygonData(ps);
-		System.out.println("Polycount: "+m.getPolygonCount()+" "+newPolys.keySet().size());
-		System.out.println("Vertexcount: "+m.getVertexCount()+" "+newVerts.keySet().size());
-		System.out.println("Edgecount: "+m.getEdgeData().capacity()+" "+newEdges.keySet().size());
-
 		this.mMesh = (Mesh) m;
-		
-		
-		
 	}
 	
 	public Mesh getNewMesh()
