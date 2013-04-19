@@ -62,7 +62,9 @@ public class EdgeDS {
 	private int currentEdgeID;
 	private int currentPolygonID;
 	
-	
+	public TreeSet<Integer> getCreaseSet() {
+		return this.creaseSet;
+	}
 	private int getNewEdgeID()
 		{
 		this.currentEdgeID = this.currentEdgeID +1;
