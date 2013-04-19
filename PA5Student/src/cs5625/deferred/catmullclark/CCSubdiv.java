@@ -80,9 +80,9 @@ public class CCSubdiv {
 			if (!(edgeDS.isCreaseEdge(edgeID) || edgeDS
 					.getOtherEdgesOfRightFace(edgeID).isEmpty())) {
 				// Normal Case
-				// only adds 4 as a weight to each connected vertex because they are triple counted
+				// only adds 4 as a weight to each connected vertex because they are double counted
 				// later in the x1 weighting
-				// total weighting = 6
+				// total weighting = 4 + 1 + 1 = 6
 				Point3f temp = edgeDS.getVertexData(edge.getVertex0()).mData.getPosition();
 				temp.scale(6f-2f);
 				pos.add(temp);
@@ -90,7 +90,6 @@ public class CCSubdiv {
 				Point3f temp2 = edgeDS.getVertexData(edge.getVertex1()).mData.getPosition();
 				temp2.scale(6f-2f);
 				pos.add(temp2);
-			
 				
 				ArrayList<Integer> ps = edge.getPolys();
 				ArrayList<Integer> leftVerts = edgeDS.getPolygonData(ps.get(0)).getAllVertices();
@@ -165,18 +164,14 @@ public class CCSubdiv {
 						EdgeData ec = edgeDS.getEdgeData(connected);
 						if(ec.getVertex0() == vertID){
 							Point3f temp = edgeDS.getVertexData(ec.getVertex1()).mData.getPosition();
-							temp.scale(1);
+							temp.scale(1f);
 							System.out.println(temp);
 							pos.add(temp);
-							System.out.println("added a 1");
-							//count++;
 						}else if(ec.getVertex1() == vertID){
 							Point3f temp = edgeDS.getVertexData(ec.getVertex0()).mData.getPosition();
-							temp.scale(1);
+							temp.scale(1f);
 							System.out.println(temp);
 							pos.add(temp);
-							System.out.println("added a 1");
-							//count++;
 						}
 						
 					}
@@ -184,27 +179,25 @@ public class CCSubdiv {
 					// add verts with weight of 6
 					if(e.getVertex0() == vertID){
 						Point3f temp = edgeDS.getVertexData(e.getVertex1()).mData.getPosition();
-						//temp.scale(6);
-						System.out.println(temp);
+						temp.scale(6f);
+						//System.out.println(temp);
 						pos.add(temp);
-						System.out.println("6");
-						//count += 6;
 					}else if(e.getVertex1() == vertID){
 						Point3f temp = edgeDS.getVertexData(e.getVertex0()).mData.getPosition();
-						//temp.scale(6);
+						temp.scale(6f);
 						System.out.println(temp);
 						pos.add(temp);
-						System.out.println("6");
-						//count += 6;
 					}
 				}
 				
 				
 			}
-			//System.out.println("Positions = " + vert.mData.getPosition());
-			pos.scale(1f/((float) scalar));
-			//System.out.println(vert.mData.getPosition());
-			System.out.println("Scalar = " + scalar);
+			System.out.println("Positions = " + vert.mData.getPosition());
+			float scale = (float) 1f/((float) scalar);
+			System.out.println(scale);
+			pos.scale((float) scale);
+			System.out.println("Final Position: " + vert.mData.getPosition());
+			//System.out.println("Scalar = " + scalar);
 			//pos.scale(1/(scalar));
 			
 			if(pos.x > 1){
