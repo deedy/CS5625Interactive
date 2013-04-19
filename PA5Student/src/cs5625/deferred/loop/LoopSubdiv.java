@@ -20,6 +20,8 @@ import java.util.TreeMap;
 import javax.vecmath.Point2f;
 import javax.vecmath.Point3f;
 
+import com.jogamp.common.nio.Buffers;
+
 import cs5625.deferred.misc.*;
 /**
  * LoopSubdiv.java
@@ -294,8 +296,8 @@ public class LoopSubdiv {
 		}
 		
 		/// TODO ADD VERTS TO MESH
-		FloatBuffer vs = FloatBuffer.allocate(3*newVerts.keySet().size());
-		FloatBuffer ts = FloatBuffer.allocate(2*newVerts.keySet().size());
+		FloatBuffer vs = Buffers.newDirectFloatBuffer(3*newVerts.keySet().size());
+		FloatBuffer ts = Buffers.newDirectFloatBuffer(3*newVerts.keySet().size());
 		for(Integer v : newVerts.keySet()){
 			Point3f p = newVerts.get(v).mData.getPosition();
 			Point2f t = newVerts.get(v).mData.getTexCoord(); 
@@ -308,7 +310,7 @@ public class LoopSubdiv {
 		}
 		vs.rewind();
 		ts.rewind();
-		IntBuffer ps = IntBuffer.allocate(3*newPolys.keySet().size());
+		IntBuffer ps = Buffers.newDirectIntBuffer(3*newPolys.keySet().size());
 		for(Integer p : newPolys.keySet()){
 			ArrayList<Integer> verts = newPolys.get(p).getAllVertices();
 			ps.put(verts.get(0));
@@ -316,11 +318,21 @@ public class LoopSubdiv {
 			ps.put(verts.get(2));
 		}
 		ps.rewind();
-		IntBuffer es = IntBuffer.allocate(2*newEdges.keySet().size());
+		IntBuffer es = Buffers.newDirectIntBuffer(2*newEdges.keySet().size());
 		for(Integer e : newEdges.keySet()){
 			es.put(newEdges.get(e).getVertex0());
 			es.put(newEdges.get(e).getVertex1());
 		}
+//		for (Integer i : edgeDS.getCreaseSet()) {
+//			EdgeData edgeData = edgeDS.getEdgeData(i);
+//			int p0 = edgeDS.getVertexData(edgeData.getVertex0()).getNewVertexID();
+//			int p1 = edgeData.getNewVertexID();
+//			int p2 = edgeDS.getVertexData(edgeData.getVertex1()).getNewVertexID();
+//			es.put(p1);
+//			es.put(p0);
+//			es.put(p2);
+//			es.put(p1);
+//		}
 		es.rewind();
 		//Trimesh m = new Trimesh();
 		this.mMesh = edgeDS.getMesh();
