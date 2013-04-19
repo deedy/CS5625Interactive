@@ -10,6 +10,7 @@ import cs5625.deferred.scenegraph.Mesh;
 
 
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeMap;
@@ -220,8 +221,7 @@ public class LoopSubdiv {
 			PolygonData poly = edgeDS.getPolygonData(polyID);
 			ArrayList<Integer> allEdges = poly.getAllEdges();
 			
-			System.out.println(polyID+": " + allEdges);
-			System.out.println(allEdges.get(0));
+
 			
 			//Find the new vertices of the face
 			// XXX RESUME - remove need for edgeDS - causing errors because it contains invalid data.
@@ -239,37 +239,76 @@ public class LoopSubdiv {
 			newEdges.put(edgenv2nv0, new EdgeData(newvert2,newvert0));
 			
 			//Get the 3 pre-existing vertices in the triangle
-			int vert0 = edgeDS.getEdgeData(allEdges.get(0)).getVertex0();
-			int vert1 = edgeDS.getEdgeData(allEdges.get(1)).getVertex0();
-			//change to other vertex if needed
-			vert1 = vert1 != vert0 ? vert1 : edgeDS.getEdgeData(allEdges.get(1)).getVertex1();
-			int vert2 = edgeDS.getEdgeData(allEdges.get(2)).getVertex0();
-			vert2 = vert2 != vert0 && vert2 != vert1 ? vert2 : edgeDS.getEdgeData(allEdges.get(1)).getVertex1();
+//			int vert0 = edgeDS.getEdgeData(allEdges.get(0)).getVertex1();
+//			int vert1 = edgeDS.getEdgeData(allEdges.get(1)).getVertex0();
+//			//change to other vertex if needed
+//			//vert1 = vert1 != vert0 ? vert1 : edgeDS.getEdgeData(allEdges.get(1)).getVertex1();
+//			int vert2 = edgeDS.getEdgeData(allEdges.get(2)).getVertex1();
+//			//vert2 = vert2 != vert0 && vert2 != vert1 ? vert2 : edgeDS.getEdgeData(allEdges.get(1)).getVertex1();
 			
-			System.out.println(poly.getAllVertices());
+			int vert0 = poly.getAllVertices().get(0);
+			int vert1 = poly.getAllVertices().get(1);
+			int vert2 = poly.getAllVertices().get(2);
+//			int temp = newvert2;
+//			newvert2 = newvert1;
+//			newvert1 = temp;
+			
+			System.out.println("Face"+polyID+" edges: " + allEdges);
+			
+			System.out.println("Face" +polyID+" verts: " + poly.getAllVertices());
 			System.out.println("verts: " + vert0 +","+vert1+","+vert2);
 			System.out.println("intermediate verts: " + newvert0 +","+newvert1+","+newvert2);
 			
 			//Get the 6 edges connecting the 3 pre-existing vertices to the new ones
-			int edge0nv0 = newVerts.get(vert0).getEdgeIDforEdgeWithThisVertex(newvert0).getData();
-			System.out.println("CANT FIND EDGE WITH: " + vert1 + " , " + newvert0);
-			int edgenv01 = newVerts.get(vert1).getEdgeIDforEdgeWithThisVertex(newvert0).getData();
-			int edge1nv1 = newVerts.get(vert1).getEdgeIDforEdgeWithThisVertex(newvert1).getData();
-			int edgenv12 = newVerts.get(vert2).getEdgeIDforEdgeWithThisVertex(newvert1).getData();
-			int edge2nv2 = newVerts.get(vert2).getEdgeIDforEdgeWithThisVertex(newvert2).getData();
-			int edgenv20 = newVerts.get(vert0).getEdgeIDforEdgeWithThisVertex(newvert2).getData();
+			//System.out.println("CANT FIND EDGE WITH: " + vert1 + " , " + newvert0);
+			
+			int e1 = newVerts.get(vert0).getEdgeIDforEdgeWithThisVertex(newvert0).getData();
+			int e2 = newVerts.get(newvert0).getEdgeIDforEdgeWithThisVertex(vert1).getData();
+			int e3 = newVerts.get(vert1).getEdgeIDforEdgeWithThisVertex(newvert1).getData();
+			int e4 = newVerts.get(newvert1).getEdgeIDforEdgeWithThisVertex(vert2).getData();
+			int e5 = newVerts.get(vert2).getEdgeIDforEdgeWithThisVertex(newvert2).getData();
+			int e6 = newVerts.get(newvert2).getEdgeIDforEdgeWithThisVertex(vert0).getData();
+			
+			////////////////////////////////////////////////////
+			// Create new edges forming center face of subdivision
+			
+			int e7 = newEdgeID++;
+			newEdges.put(e7, new EdgeData(newvert0,newvert1));
+			newVerts.get(newvert0).addVertexConnectivity(new EdgeVertexPair(e7, newvert1));			
+			newVerts.get(newvert1).addVertexConnectivity(new EdgeVertexPair(e7, newvert0));
+
+			int e8 = newEdgeID++;
+			newEdges.put(e8, new EdgeData(newvert0,newvert1));
+			newVerts.get(newvert0).addVertexConnectivity(new EdgeVertexPair(e8, newvert1));			
+			newVerts.get(newvert1).addVertexConnectivity(new EdgeVertexPair(e8, newvert0));
+			
+			int e9 = newEdgeID++;
+			newEdges.put(e9, new EdgeData(newvert0,newvert1));
+			newVerts.get(newvert0).addVertexConnectivity(new EdgeVertexPair(e9, newvert1));			
+			newVerts.get(newvert1).addVertexConnectivity(new EdgeVertexPair(e9, newvert0));
+			
+			////////////////////////////////////////////////////
+
 			
 			//Create the 4 polygons of a triangular face accordingly
-			newPolys.put(newPolyID++, new PolygonData(edgenv0nv1,edgenv1nv2,edgenv2nv0,newvert0,newvert1,newvert2));
-			newPolys.put(newPolyID++, new PolygonData(edge0nv0,edgenv2nv0,edgenv20,vert0,newvert0,newvert2));
-			newPolys.put(newPolyID++, new PolygonData(edgenv01,edge1nv1,edgenv0nv1,newvert0,vert1,newvert1));
-			newPolys.put(newPolyID++, new PolygonData(edgenv1nv2,edgenv12,edge2nv2,newvert2,newvert1,vert2));
+			newPolys.put(newPolyID++, new PolygonData(e1,e7,e6,vert0,newvert0,newvert2));
+			newPolys.put(newPolyID++, new PolygonData(e2,e3,e8,newvert0,vert1,newvert1));
+			newPolys.put(newPolyID++, new PolygonData(e9,e4,e5,newvert2,newvert1,vert2));
+			newPolys.put(newPolyID++, new PolygonData(e7,e8,e9,newvert0,newvert1,newvert2));
 			
 		}
 		
 		// Create the Trimesh
 
-		//this.mMesh = tri.getMesh();
+		//this.mMesh.setVertexData();
+		
+		/// TODO ADD VERTS TO MESH
+		FloatBuffer vs = FloatBuffer.allocate(3*newVerts.keySet().size());
+		for(Integer v : newVerts.keySet()){
+			//vs.put(newVerts.get(v).mData.getPosition().get(arg0))
+		}
+		
+		
 		
 		
 	}
