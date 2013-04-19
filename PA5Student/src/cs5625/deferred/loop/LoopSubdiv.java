@@ -306,6 +306,8 @@ public class LoopSubdiv {
 			ts.put(t.y);
 			//vs.put(newVerts.get(v).mData.getPosition().get(arg0))
 		}
+		vs.rewind();
+		ts.rewind();
 		IntBuffer ps = IntBuffer.allocate(3*newPolys.keySet().size());
 		for(Integer p : newPolys.keySet()){
 			ArrayList<Integer> verts = newPolys.get(p).getAllVertices();
@@ -313,11 +315,13 @@ public class LoopSubdiv {
 			ps.put(verts.get(1));
 			ps.put(verts.get(2));
 		}
+		ps.rewind();
 		IntBuffer es = IntBuffer.allocate(2*newEdges.keySet().size());
 		for(Integer e : newEdges.keySet()){
 			es.put(newEdges.get(e).getVertex0());
 			es.put(newEdges.get(e).getVertex1());
 		}
+		es.rewind();
 		//Trimesh m = new Trimesh();
 		this.mMesh = edgeDS.getMesh();
 		Trimesh m = (Trimesh) this.mMesh.clone();
