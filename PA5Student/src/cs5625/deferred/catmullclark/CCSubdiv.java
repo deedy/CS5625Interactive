@@ -17,6 +17,7 @@ import cs5625.deferred.datastruct.PolygonData;
 import cs5625.deferred.datastruct.VertexAttributeData;
 import cs5625.deferred.datastruct.VertexData;
 import cs5625.deferred.scenegraph.Mesh;
+import cs5625.deferred.scenegraph.Quadmesh;
 import cs5625.deferred.scenegraph.Trimesh;
 
 public class CCSubdiv {
@@ -274,8 +275,8 @@ public class CCSubdiv {
 			vs.put(p.x);
 			vs.put(p.y);
 			vs.put(p.z);
-			ts.put(t.x);
-			ts.put(t.y);
+			ts.put(0);
+			ts.put(0);
 		}
 		vs.rewind();
 		ts.rewind();
@@ -303,7 +304,7 @@ public class CCSubdiv {
 		}
 		es.rewind();
 		this.mMesh = edgeDS.getMesh();
-		Trimesh m = (Trimesh) this.mMesh.clone();
+		Quadmesh m = (Quadmesh) this.mMesh.clone();
 		m.setVertexData(vs);
 		m.setTexCoordData(ts);
 		m.setEdgeData(es);
