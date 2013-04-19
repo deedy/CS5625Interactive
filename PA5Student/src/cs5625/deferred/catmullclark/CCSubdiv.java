@@ -36,28 +36,31 @@ public class CCSubdiv {
 		int newPolyID = 0;
 
 		
+		
 		for (Integer polyID : edgeDS.getPolygonIDs()) {
 			PolygonData p = edgeDS.getPolygonData(polyID);
 			
-			Point3f pos;
+			// center vertex
+			Point3f pos = new Point3f();
 			Point2f tex = null;
 			Point3f p1 = edgeDS.getVertexData(p.getAllVertices().get(0)).mData.getPosition();
 			Point3f p2 = edgeDS.getVertexData(p.getAllVertices().get(1)).mData.getPosition();
 			Point3f p3 = edgeDS.getVertexData(p.getAllVertices().get(2)).mData.getPosition();
 			Point3f p4 = edgeDS.getVertexData(p.getAllVertices().get(3)).mData.getPosition();
-			Point3f cvert = new Point3f();
-			cvert.add(p1);
-			cvert.add(p2);
-			cvert.add(p3);
-			cvert.add(p4);
-			cvert.x = cvert.x / 4;
-			cvert.y = cvert.y / 4;
-			cvert.z = cvert.z / 4;
-
+			
+			pos.add(p1);
+			pos.add(p2);
+			pos.add(p3);
+			pos.add(p4);
+			pos.scale(.25f);			
+			
+			if(Math.abs(pos.distance(new Point3f())) > 1){
+				System.out.println("ERROR ON 58: " +pos);
+			}
 			
 			
 			// Inserting vertex into our TreeMap
-			VertexData vertdata = new VertexData(new VertexAttributeData(cvert, tex));
+			VertexData vertdata = new VertexData(new VertexAttributeData(pos, tex));
 			newVerts.put(newVertID, vertdata); // Put new positions of even
 												// vertices in our TreeMap
 
@@ -77,14 +80,16 @@ public class CCSubdiv {
 			if (!(edgeDS.isCreaseEdge(edgeID) || edgeDS
 					.getOtherEdgesOfRightFace(edgeID).isEmpty())) {
 				// Normal Case
+				// only adds 4 as a weight to each connected vertex because they are double counted
+				// later in the x1 weighting
+				// total weighting = 4 + 1 + 1 = 6
 				Point3f temp = edgeDS.getVertexData(edge.getVertex0()).mData.getPosition();
-				temp.scale(4);
+				temp.scale(6f-2f);
 				pos.add(temp);
 				
 				Point3f temp2 = edgeDS.getVertexData(edge.getVertex1()).mData.getPosition();
-				temp2.scale(4);
+				temp2.scale(6f-2f);
 				pos.add(temp2);
-			
 				
 				ArrayList<Integer> ps = edge.getPolys();
 				ArrayList<Integer> leftVerts = edgeDS.getPolygonData(ps.get(0)).getAllVertices();
@@ -98,13 +103,19 @@ public class CCSubdiv {
 					pos.add(edgeDS.getVertexData(v).mData.getPosition());
 				}
 				
-				pos.scale(1/(2*6 + 4*1));
+				System.out.println(pos);
+				//float scale = 1/(2*6 + 4*1);
+				pos.scale(1f/16f);
+				System.out.println("pos after: " + pos);
 			
 			} else {
 				// TODO
 				continue;
 			}
 
+			if(Math.abs(pos.distance(new Point3f())) > 2){
+				System.out.println("ERROR ON 112: " +pos);
+			}
 			
 			// Inserting vertex into our TreeMap
 			VertexData vertdata = new VertexData(new VertexAttributeData(pos,
@@ -123,7 +134,11 @@ public class CCSubdiv {
 			int adjacency = vert.getConnectedVertices().size();
 			Point3f pos = new Point3f(vert.mData.getPosition());
 			Point2f tex = new Point2f(vert.mData.getTexCoord());
-		
+			
+			//System.out.println("VERT! :" + edgeDS.getVertexData(0).mData.getPosition());
+			System.out.println("Position starting: " + pos);
+			float scalar = (4 * adjacency * adjacency);
+			int count = 0;
 			
 			if (true /* TODO RESUME- vertex is not on creased edge*/) {
 //				float scalar1 = (adjacency - 2)/adjacency;
@@ -132,9 +147,13 @@ public class CCSubdiv {
 				
 				// based off of 
 				// <http://http.developer.nvidia.com/GPUGems2/elementLinks/07_tessellation_02.jpg>
-				float scalar = (4 * adjacency * adjacency);
+				
 				float centerweight = scalar - (7)*adjacency;
 				pos.scale(centerweight);
+				System.out.println(pos);
+				//count += centerweight;
+				
+				System.out.println("Center weighting= " + centerweight);
 				
 				
 				for(Integer eid : vert.getConnectedEdges()){
@@ -144,27 +163,48 @@ public class CCSubdiv {
 					for(Integer connected : edgeDS.getOtherEdgesOfRightFace(eid)){
 						EdgeData ec = edgeDS.getEdgeData(connected);
 						if(ec.getVertex0() == vertID){
-							pos.add(edgeDS.getVertexData(ec.getVertex1()).mData.getPosition());
+							Point3f temp = edgeDS.getVertexData(ec.getVertex1()).mData.getPosition();
+							temp.scale(1f);
+							System.out.println(temp);
+							pos.add(temp);
 						}else if(ec.getVertex1() == vertID){
-							pos.add(edgeDS.getVertexData(ec.getVertex0()).mData.getPosition());
+							Point3f temp = edgeDS.getVertexData(ec.getVertex0()).mData.getPosition();
+							temp.scale(1f);
+							System.out.println(temp);
+							pos.add(temp);
 						}
+						
 					}
 					
 					// add verts with weight of 6
 					if(e.getVertex0() == vertID){
 						Point3f temp = edgeDS.getVertexData(e.getVertex1()).mData.getPosition();
-						temp.scale(6);
+						temp.scale(6f);
+						//System.out.println(temp);
 						pos.add(temp);
 					}else if(e.getVertex1() == vertID){
 						Point3f temp = edgeDS.getVertexData(e.getVertex0()).mData.getPosition();
-						temp.scale(6);
+						temp.scale(6f);
+						System.out.println(temp);
 						pos.add(temp);
 					}
 				}
 				
-				pos.scale(1/scalar);
+				
 			}
-	
+			System.out.println("Positions = " + vert.mData.getPosition());
+			float scale = (float) 1f/((float) scalar);
+			System.out.println(scale);
+			pos.scale((float) scale);
+			System.out.println("Final Position: " + vert.mData.getPosition());
+			//System.out.println("Scalar = " + scalar);
+			//pos.scale(1/(scalar));
+			
+			if(pos.x > 1){
+				System.out.println("ERROR ON 172");
+				//pos = 
+			}
+			
 			VertexData vertdata = new VertexData(new VertexAttributeData(pos,
 					tex));
 			newVerts.put(newVertID, vertdata); // Put new positions of even
