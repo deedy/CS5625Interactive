@@ -192,11 +192,11 @@ public class CCSubdiv {
 				
 				
 			}
-			System.out.println("Positions = " + vert.mData.getPosition());
+			System.out.println("Positions = " + pos);
 			float scale = (float) 1f/((float) scalar);
 			System.out.println(scale);
 			pos.scale((float) scale);
-			System.out.println("Final Position: " + vert.mData.getPosition());
+			System.out.println("Final Position: " + pos);
 			//System.out.println("Scalar = " + scalar);
 			//pos.scale(1/(scalar));
 			
