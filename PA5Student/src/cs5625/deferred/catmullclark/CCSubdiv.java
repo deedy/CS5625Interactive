@@ -36,29 +36,37 @@ public class CCSubdiv {
 		int newPolyID = 0;
 
 		
-		
+		//  Scan through all polygons and create new vertices at the center of the polygons
 		for (Integer polyID : edgeDS.getPolygonIDs()) {
 			PolygonData p = edgeDS.getPolygonData(polyID);
 			
 			// center vertex
-			Point3f pos = new Point3f();
-			Point2f tex = null;
-			Point3f p1 = edgeDS.getVertexData(p.getAllVertices().get(0)).mData.getPosition();
-			Point3f p2 = edgeDS.getVertexData(p.getAllVertices().get(1)).mData.getPosition();
-			Point3f p3 = edgeDS.getVertexData(p.getAllVertices().get(2)).mData.getPosition();
-			Point3f p4 = edgeDS.getVertexData(p.getAllVertices().get(3)).mData.getPosition();
-			
-			pos.add(p1);
-			pos.add(p2);
-			pos.add(p3);
-			pos.add(p4);
-			pos.scale(.25f);			
-			
-			if(Math.abs(pos.distance(new Point3f())) > 1){
-				System.out.println("ERROR ON 58: " +pos);
-			}
-			
-			
+			VertexAttributeData p1 = edgeDS.getVertexData(p.getAllVertices().get(0)).mData;
+			VertexAttributeData p2 = edgeDS.getVertexData(p.getAllVertices().get(1)).mData;
+			VertexAttributeData p3 = edgeDS.getVertexData(p.getAllVertices().get(2)).mData;
+			VertexAttributeData p4 = edgeDS.getVertexData(p.getAllVertices().get(3)).mData;
+			Point3f pos = new Point3f(p1.getPosition());
+			Point2f tex = new Point2f(p1.getTexCoord());
+			pos.scale(1f / 4f);
+			tex.scale(1f / 4f);
+			Point3f temp = new Point3f(p2.getPosition());
+			Point2f temp1 = new Point2f(p2.getTexCoord());
+			temp.scale(1f / 4f);
+			temp1.scale(1f / 4f);
+			pos.add(temp);
+			tex.add(temp1);
+			temp = new Point3f(p3.getPosition());
+			temp1 = new Point2f(p3.getTexCoord());
+			temp.scale(1f / 4f);
+			temp1.scale(1f / 4f);
+			pos.add(temp);
+			tex.add(temp1);
+			temp = new Point3f(p4.getPosition());
+			temp1 = new Point2f(p4.getTexCoord());
+			temp.scale(1f / 4f);
+			temp1.scale(1f / 4f);
+			pos.add(temp);
+			tex.add(temp1);		
 			// Inserting vertex into our TreeMap
 			VertexData vertdata = new VertexData(new VertexAttributeData(pos, tex));
 			newVerts.put(newVertID, vertdata); // Put new positions of even
@@ -68,275 +76,233 @@ public class CCSubdiv {
 			p.setNewFaceVertexID(newVertID++);
 			
 		}
-		// Scan through all edges and create new vertices with correct positions
 		for (Integer edgeID : edgeDS.getEdgeIDs()) {
 			
 			EdgeData edge = edgeDS.getEdgeData(edgeID);
-			
-			Point3f pos = new Point3f();
-			Point2f tex = new Point2f();		
-			
-	
-			if (!(edgeDS.isCreaseEdge(edgeID) || edgeDS
-					.getOtherEdgesOfRightFace(edgeID).isEmpty())) {
-				// Normal Case
-				// only adds 4 as a weight to each connected vertex because they are double counted
-				// later in the x1 weighting
-				// total weighting = 4 + 1 + 1 = 6
-				Point3f temp = edgeDS.getVertexData(edge.getVertex0()).mData.getPosition();
-				temp.scale(6f-2f);
+			VertexAttributeData p1 = edgeDS.getVertexData(edge.getVertex0()).mData;
+			VertexAttributeData p2 = edgeDS.getVertexData(edge.getVertex1()).mData;
+			ArrayList<Integer> leftEdges = edgeDS.getOtherEdgesOfLeftFace(edgeID);
+			ArrayList<Integer> rightEdges = edgeDS.getOtherEdgesOfRightFace(edgeID);
+			Point3f pos;
+			Point2f tex;
+			if (edgeDS.isCreaseEdge(edgeID) || leftEdges.size()!=3 || rightEdges.size()!=3) {
+				pos = new Point3f(p1.getPosition());
+				tex = new Point2f(p1.getTexCoord());
+				pos.scale(1f / 2f);
+				tex.scale(1f / 2f);
+				Point3f temp = new Point3f(p2.getPosition());
+				Point2f temp1 = new Point2f(p2.getTexCoord());
+				temp.scale(1f / 2f);
+				temp1.scale(1f / 2f);
 				pos.add(temp);
-				
-				Point3f temp2 = edgeDS.getVertexData(edge.getVertex1()).mData.getPosition();
-				temp2.scale(6f-2f);
-				pos.add(temp2);
-				
-				ArrayList<Integer> ps = edge.getPolys();
-				ArrayList<Integer> leftVerts = edgeDS.getPolygonData(ps.get(0)).getAllVertices();
-				ArrayList<Integer> rightVerts = edgeDS.getPolygonData(ps.get(1)).getAllVertices();
-				
-				for(Integer v : leftVerts){
-					pos.add(edgeDS.getVertexData(v).mData.getPosition());
-				}
-				
-				for(Integer v : rightVerts){
-					pos.add(edgeDS.getVertexData(v).mData.getPosition());
-				}
-				
-				System.out.println(pos);
-				//float scale = 1/(2*6 + 4*1);
-				pos.scale(1f/16f);
-				System.out.println("pos after: " + pos);
-			
+				tex.add(temp1);
 			} else {
-				// TODO
-				continue;
+				PolygonData poly1 = edgeDS.getPolygonData(edge.getPolys().get(0));
+				PolygonData poly2 = edgeDS.getPolygonData(edge.getPolys().get(1));
+				pos = new Point3f(p1.getPosition());
+				tex = new Point2f(p1.getTexCoord());
+				pos.scale(3f / 8f);
+				tex.scale(3f / 8f);
+				Point3f temp = new Point3f(p2.getPosition());
+				Point2f temp1 = new Point2f(p2.getTexCoord());
+				temp.scale(3f / 8f);
+				temp1.scale(3f / 8f);
+				pos.add(temp);
+				tex.add(temp1);
+				for (Integer vertID: poly1.getAllVertices()) {
+					if (vertID != edge.getVertex0() && vertID != edge.getVertex1()) {
+						temp = new Point3f(edgeDS.getVertexData(vertID).mData.getPosition());
+						temp1 = new Point2f(edgeDS.getVertexData(vertID).mData.getTexCoord());
+						temp.scale(1f / 16f);
+						temp1.scale(1f / 16f);
+						pos.add(temp);
+						tex.add(temp1);
+					}
+				}
+				for (Integer vertID: poly2.getAllVertices()) {
+					if (vertID != edge.getVertex0() && vertID != edge.getVertex1()) {
+						temp = new Point3f(edgeDS.getVertexData(vertID).mData.getPosition());
+						temp1 = new Point2f(edgeDS.getVertexData(vertID).mData.getTexCoord());
+						temp.scale(1f / 16f);
+						temp1.scale(1f / 16f);
+						pos.add(temp);
+						tex.add(temp1);
+					}
+				}
+				
 			}
-
-			if(Math.abs(pos.distance(new Point3f())) > 2){
-				System.out.println("ERROR ON 112: " +pos);
-			}
+			 //Inserting vertex into our TreeMap
+			VertexData vertdata = new VertexData(new VertexAttributeData(pos,tex));
+			newVerts.put(newVertID, vertdata); //Put new positions of even vertices in our TreeMap
 			
-			// Inserting vertex into our TreeMap
-			VertexData vertdata = new VertexData(new VertexAttributeData(pos,
-					tex));
-			newVerts.put(newVertID, vertdata); // Put new positions of even
-												// vertices in our TreeMap
-
-			// Storing the new vertex in the edge it was created in
-			edge.setVertexIDNew(newVertID++);
-
+			//Storing the new vertex in the edge it was created in
+			edge.setVertexIDNew(newVertID++); 
 		}
-
 		// Scan through all vertices to find new positions of the existing ones
 		for (Integer vertID : edgeDS.getVertexIDs()) {
 			VertexData vert = edgeDS.getVertexData(vertID);
-			int adjacency = vert.getConnectedVertices().size();
+			int creaseCount = 0;
+			ArrayList<Integer> creaseVerts = new ArrayList<Integer>();
+		
 			Point3f pos = new Point3f(vert.mData.getPosition());
 			Point2f tex = new Point2f(vert.mData.getTexCoord());
-			
-			//System.out.println("VERT! :" + edgeDS.getVertexData(0).mData.getPosition());
-			System.out.println("Position starting: " + pos);
-			float scalar = (4 * adjacency * adjacency);
-			int count = 0;
-			
-			if (true /* TODO RESUME- vertex is not on creased edge*/) {
-//				float scalar1 = (adjacency - 2)/adjacency;
-//				Point3f term1 = (Point3f) pos.clone();
-//				term1.scale(scalar1);
+			for (Integer edgeID : vert.getConnectedEdges()) {
+				if (edgeDS.isCreaseEdge(edgeID)) {
+					creaseCount++;
+					EdgeData tmp = edgeDS.getEdgeData(edgeID);
+					if (tmp.getVertex0()==vertID) 
+						creaseVerts.add(tmp.getVertex1());
+					else
+						creaseVerts.add(tmp.getVertex0());
+				}
+			}
+			if (creaseCount > 2) {
 				
-				// based off of 
-				// <http://http.developer.nvidia.com/GPUGems2/elementLinks/07_tessellation_02.jpg>
-				
-				float centerweight = scalar - (7)*adjacency;
-				pos.scale(centerweight);
-				System.out.println(pos);
-				//count += centerweight;
-				
-				System.out.println("Center weighting= " + centerweight);
-				
-				
-				for(Integer eid : vert.getConnectedEdges()){
-					EdgeData e = edgeDS.getEdgeData(eid);
-					
-					// find opposite verts with weight of 1
-					for(Integer connected : edgeDS.getOtherEdgesOfRightFace(eid)){
-						EdgeData ec = edgeDS.getEdgeData(connected);
-						if(ec.getVertex0() == vertID){
-							Point3f temp = edgeDS.getVertexData(ec.getVertex1()).mData.getPosition();
-							temp.scale(1f);
-							System.out.println(temp);
-							pos.add(temp);
-						}else if(ec.getVertex1() == vertID){
-							Point3f temp = edgeDS.getVertexData(ec.getVertex0()).mData.getPosition();
-							temp.scale(1f);
-							System.out.println(temp);
-							pos.add(temp);
-						}
-						
+			} else if (creaseCount == 2) {
+				pos.scale(3f / 4f);
+				tex.scale(3f / 4f);
+				Point3f temp = new Point3f(edgeDS.getVertexData(creaseVerts.get(0)).mData.getPosition());
+				Point2f temp1 = new Point2f(edgeDS.getVertexData(creaseVerts.get(0)).mData.getTexCoord());
+				temp.scale(1f / 8f);
+				temp1.scale(1f / 8f);
+				pos.add(temp);
+				tex.add(temp1);
+				temp = new Point3f(edgeDS.getVertexData(creaseVerts.get(1)).mData.getPosition());
+				temp1 = new Point2f(edgeDS.getVertexData(creaseVerts.get(1)).mData.getTexCoord());
+				temp.scale(1f / 8f);
+				temp1.scale(1f / 8f);
+				pos.add(temp);
+				tex.add(temp1);
+			} else if (creaseCount < 2) {
+				float n = vert.getValence();
+				pos.scale((n-2) / n);
+				tex.scale((n-2) / n);
+				Point3f temp;
+				Point2f temp1;
+				ArrayList<Integer> adjacentPolys = new ArrayList<Integer>();
+				for (Integer edgeID : vert.getConnectedEdges()) {
+					EdgeData tmp = edgeDS.getEdgeData(edgeID);
+					//Not sure if adjacent vertices or middle-edge vertices
+					if (tmp.getVertex0()==vertID) {
+						temp = new Point3f(edgeDS.getVertexData(tmp.getVertex1()).mData.getPosition());
+						temp1 = new Point2f(edgeDS.getVertexData(tmp.getVertex1()).mData.getTexCoord());
+					} else {
+						temp = new Point3f(edgeDS.getVertexData(tmp.getVertex0()).mData.getPosition());
+						temp1 = new Point2f(edgeDS.getVertexData(tmp.getVertex0()).mData.getTexCoord());
 					}
-					
-					// add verts with weight of 6
-					if(e.getVertex0() == vertID){
-						Point3f temp = edgeDS.getVertexData(e.getVertex1()).mData.getPosition();
-						temp.scale(6f);
-						//System.out.println(temp);
-						pos.add(temp);
-					}else if(e.getVertex1() == vertID){
-						Point3f temp = edgeDS.getVertexData(e.getVertex0()).mData.getPosition();
-						temp.scale(6f);
-						System.out.println(temp);
-						pos.add(temp);
+					temp.scale(1f / (n*n));
+					temp1.scale(1f / (n*n));
+					pos.add(temp);
+					tex.add(temp1);
+					for (Integer polyID : tmp.getPolys()) {
+						if (!adjacentPolys.contains(polyID)) {
+							adjacentPolys.add(polyID);
+						}
 					}
 				}
-				
-				
+				for (Integer polyID : adjacentPolys) {
+					VertexData f_i = newVerts.get(edgeDS.getPolygonData(polyID).getNewFaceVertexID());
+					temp = new Point3f(f_i.mData.getPosition());
+					temp1 = new Point2f(f_i.mData.getTexCoord());
+					temp.scale(1f / (n*n));
+					temp1.scale(1f / (n*n));
+					pos.add(temp);
+					tex.add(temp1);
+				}
 			}
-			System.out.println("Positions = " + pos);
-			float scale = (float) 1f/((float) scalar);
-			System.out.println(scale);
-			pos.scale((float) scale);
-			System.out.println("Final Position: " + pos);
-			//System.out.println("Scalar = " + scalar);
-			//pos.scale(1/(scalar));
-			
-			if(pos.x > 1){
-				System.out.println("ERROR ON 172");
-				//pos = 
-			}
-			
-			VertexData vertdata = new VertexData(new VertexAttributeData(pos,
-					tex));
-			newVerts.put(newVertID, vertdata); // Put new positions of even
-												// vertices in our TreeMap
-			vert.setNewVertexID(newVertID++); // Setting the old vertex IDs to
-												// the new ones we created
+			 //Inserting vertex into our TreeMap
+			VertexData vertdata = new VertexData(new VertexAttributeData(pos,tex));
+			newVerts.put(newVertID, vertdata); //Put new positions of even vertices in our TreeMap
+			vert.setNewVertexID(newVertID++);		
 		}
-
-
 		// Scan through all the pre-existing edges to create new ones
 		for (Integer edgeID : edgeDS.getEdgeIDs()) {
 
 			EdgeData edge = edgeDS.getEdgeData(edgeID);
 			int newVertex = edge.getNewVertexID();
-
-			int vert0 = edgeDS.getVertexData(edge.getVertex0())
-					.getNewVertexID();
-			int vert1 = edgeDS.getVertexData(edge.getVertex1())
-					.getNewVertexID();
-
+					
+			int vert0 = edgeDS.getVertexData(edge.getVertex0()).getNewVertexID();
+			int vert1 = edgeDS.getVertexData(edge.getVertex1()).getNewVertexID();
+					
 			int edge0n = newEdgeID++;
 			int edgen1 = newEdgeID++;
-			
-			// For each edge put an edge between the 
-			//one old vertex and the new one
-			newEdges.put(edge0n, new EdgeData(vert0, newVertex)); 
-			newEdges.put(edgen1, new EdgeData(newVertex, vert1)); 
-
-			// Store connectivity (in pairs)
-			newVerts.get(vert0).addVertexConnectivity(
-					new EdgeVertexPair(edge0n, newVertex));
-			newVerts.get(newVertex).addVertexConnectivity(
-					new EdgeVertexPair(edge0n, vert0));
-			newVerts.get(newVertex).addVertexConnectivity(
-					new EdgeVertexPair(edgen1, vert1));
-			newVerts.get(vert1).addVertexConnectivity(
-					new EdgeVertexPair(edgen1, newVertex));
+					
+			newEdges.put(edge0n, new EdgeData(vert0,newVertex)); //For each edge put an edge between the one old vertex and the new one			
+			newEdges.put(edgen1, new EdgeData(newVertex,vert1)); // and  an edge between the new one and the other old vertex
+					
+			//Store connectivity (in pairs)
+			newVerts.get(vert0).addVertexConnectivity(new EdgeVertexPair(edge0n, newVertex));
+			newVerts.get(newVertex).addVertexConnectivity(new EdgeVertexPair(edge0n, vert0));
+			newVerts.get(newVertex).addVertexConnectivity(new EdgeVertexPair(edgen1, vert1));
+			newVerts.get(vert1).addVertexConnectivity(new EdgeVertexPair(edgen1, newVertex));	
 		}
 
-		// Scan through all the pre-existing polygons to create new ones and the
-		// remaining edges
+		// Scan through all the pre-existing polygons to create new ones and the remaining edges
 		for (Integer polyID : edgeDS.getPolygonIDs()) {
 			PolygonData poly = edgeDS.getPolygonData(polyID);
 			ArrayList<Integer> allEdges = poly.getAllEdges();
+			//Find the new vertices of the face
 
-			// Find the new vertices of the face
 			int newvert0 = edgeDS.getEdgeData(allEdges.get(0)).getNewVertexID();
 			int newvert1 = edgeDS.getEdgeData(allEdges.get(1)).getNewVertexID();
 			int newvert2 = edgeDS.getEdgeData(allEdges.get(2)).getNewVertexID();
 			int newvert3 = edgeDS.getEdgeData(allEdges.get(3)).getNewVertexID();
-			int newvertc = poly.getNewFaceVertexID();
+			int facevert = poly.getNewFaceVertexID();
+			// Insert the 4 edges from the face center to the new edge vertices
+			int edgenv0f = newEdgeID++;
+			int edgenv1f = newEdgeID++;
+			int edgenv2f = newEdgeID++;
+			int edgenv3f = newEdgeID++;
+			
+			newEdges.put(edgenv0f, new EdgeData(newvert0,facevert));			
+			newEdges.put(edgenv1f, new EdgeData(newvert1,facevert));			
+			newEdges.put(edgenv2f, new EdgeData(newvert2,facevert));
+			newEdges.put(edgenv3f, new EdgeData(newvert3,facevert));
+			
+			//Get the 4 pre-existing vertices in the quad
+			int vert0 = edgeDS.getVertexData(poly.getAllVertices().get(0)).getNewVertexID();
+			int vert1 = edgeDS.getVertexData(poly.getAllVertices().get(1)).getNewVertexID();
+			int vert2 = edgeDS.getVertexData(poly.getAllVertices().get(2)).getNewVertexID();
+			int vert3 = edgeDS.getVertexData(poly.getAllVertices().get(3)).getNewVertexID();
 
-			// Insert the 4 new edges between the new vertices
-			int eid1 = newEdgeID++;
-			int eid2 = newEdgeID++;
-			int eid3 = newEdgeID++;
-			int eid4 = newEdgeID++;
-
-			newEdges.put(eid1, new EdgeData(newvert0, newvertc));
-			newEdges.put(eid2, new EdgeData(newvert1, newvertc));
-			newEdges.put(eid3, new EdgeData(newvert2, newvertc));
-			newEdges.put(eid3, new EdgeData(newvert3, newvertc));
-
-			// Get the 4 pre-existing vertices in the quad
-			int vert0 = edgeDS.getVertexData(poly.getAllVertices().get(0))
-					.getNewVertexID();
-			int vert1 = edgeDS.getVertexData(poly.getAllVertices().get(1))
-					.getNewVertexID();
-			int vert2 = edgeDS.getVertexData(poly.getAllVertices().get(2))
-					.getNewVertexID();
-			int vert3 = edgeDS.getVertexData(poly.getAllVertices().get(3))
-					.getNewVertexID();
-
-			int e1 = newVerts.get(vert0)
-					.getEdgeIDforEdgeWithThisVertex(newvert0).getData();
-			int e2 = newVerts.get(newvert0)
-					.getEdgeIDforEdgeWithThisVertex(vert1).getData();
-			int e3 = newVerts.get(vert1)
-					.getEdgeIDforEdgeWithThisVertex(newvert1).getData();
-			int e4 = newVerts.get(newvert1)
-					.getEdgeIDforEdgeWithThisVertex(vert2).getData();
-			int e5 = newVerts.get(vert2)
-					.getEdgeIDforEdgeWithThisVertex(newvert2).getData();
-			int e6 = newVerts.get(newvert2)
-					.getEdgeIDforEdgeWithThisVertex(vert3).getData();
-			int e7 = newVerts.get(vert3)
-					.getEdgeIDforEdgeWithThisVertex(newvert3).getData();
-			int e8 = newVerts.get(newvert3)
-					.getEdgeIDforEdgeWithThisVertex(vert0).getData();
 
 			// Create the 4 new quads accordingly
-			newPolys.put(newPolyID++, new PolygonData(e1,eid1,eid4,e8,vert0,newvert0,newvertc,newvert3));
-			newPolys.put(newPolyID++, new PolygonData(e2,e3,eid2,eid1,newvert0,vert1,newvert1,newvertc));
-			newPolys.put(newPolyID++, new PolygonData(eid2,e4,e5,eid3,newvertc,newvert1,vert2,newvert2));
-			newPolys.put(newPolyID++, new PolygonData(eid4,eid3,e6,e7,newvert3,newvertc,newvert2,vert3));
-			
-
+			newPolys.put(newPolyID++, new PolygonData(0,0,0,0,newvert3,facevert,newvert0,vert0));
+			newPolys.put(newPolyID++, new PolygonData(0,0,0,0,newvert2,facevert,newvert3,vert3));
+			newPolys.put(newPolyID++, new PolygonData(0,0,0,0,newvert1,facevert,newvert2,vert2));
+			newPolys.put(newPolyID++, new PolygonData(0,0,0,0,newvert0,facevert,newvert1,vert1));
 		}
+		
 
-		// Create the Trimesh
-		FloatBuffer vs = Buffers.newDirectFloatBuffer(3 * newVerts.keySet()
-				.size());
-		FloatBuffer ts = Buffers.newDirectFloatBuffer(3 * newVerts.keySet()
-				.size());
+		// Create the quadmesh
+		FloatBuffer vs = Buffers.newDirectFloatBuffer(3 * newVerts.keySet().size());
+		FloatBuffer ts = Buffers.newDirectFloatBuffer(2 * newVerts.keySet().size());
 		for (Integer v : newVerts.keySet()) {
 			Point3f p = newVerts.get(v).mData.getPosition();
 			Point2f t = newVerts.get(v).mData.getTexCoord();
 			vs.put(p.x);
 			vs.put(p.y);
 			vs.put(p.z);
-			ts.put(0);
-			ts.put(0);
+			ts.put(t.x);
+			ts.put(t.y);
 		}
 		vs.rewind();
 		ts.rewind();
-		IntBuffer ps = Buffers.newDirectIntBuffer(3 * newPolys.keySet().size());
+		IntBuffer ps = Buffers.newDirectIntBuffer(4 * newPolys.keySet().size());
 		for (Integer p : newPolys.keySet()) {
 			ArrayList<Integer> verts = newPolys.get(p).getAllVertices();
 			ps.put(verts.get(0));
 			ps.put(verts.get(1));
 			ps.put(verts.get(2));
+			ps.put(verts.get(3));
 		}
 		ps.rewind();
-		IntBuffer es = Buffers.newDirectIntBuffer(4 * edgeDS.getCreaseSet()
-				.toArray().length);
+		IntBuffer es = Buffers.newDirectIntBuffer(4 * edgeDS.getCreaseSet().toArray().length);
 		for (Integer i : edgeDS.getCreaseSet()) {
 			EdgeData edgeData = edgeDS.getEdgeData(i);
-			int p0 = edgeDS.getVertexData(edgeData.getVertex0())
-					.getNewVertexID();
+			int p0 = edgeDS.getVertexData(edgeData.getVertex0()).getNewVertexID();
 			int p1 = edgeData.getNewVertexID();
-			int p2 = edgeDS.getVertexData(edgeData.getVertex1())
-					.getNewVertexID();
+			int p2 = edgeDS.getVertexData(edgeData.getVertex1()).getNewVertexID();
 			es.put(p1);
 			es.put(p0);
 			es.put(p2);

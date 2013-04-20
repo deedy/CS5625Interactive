@@ -140,8 +140,8 @@ public class LoopSubdiv {
 					// Warren's rule for more than 3 adjacent vertices
 					scalar = 3f / (8f * (float) adjacency);
 				}
-			} else { //If on creased edge
-				// TODO FIXME
+			} else { 
+				
 			}
 			pos.scale(1f - (scalar * (float) adjacency));
 			tex.scale(1f - (scalar * (float) adjacency));
